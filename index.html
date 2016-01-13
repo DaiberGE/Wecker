@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+        <link rel="shortcut icon" href="favicon.ico"/>
+		<style type="text/css">
+			
+            @font-face { font-family: 'Digital';
+             src: url('font/Digital.ttf') format('truetype'); }
+            
+            #logo{
+                width: 250px; 
+                margin-left: auto;
+                margin-right: auto;
+                
+            }
+            
+			img {
+                width: 250px; 
+                height: auto;
+                float: left;
+			}
+			
+			body {
+				background: #000;
+			}
+            
+            #uhr{
+                font-family: Digital;
+                color: #0000FF;
+                font-size: 360px;
+                margin-left:auto;
+                margin-right:auto;
+                width: 90%;
+                text-align: center;
+            }
+			
+			#jsalarmclock{
+				font-family: Verdana;
+				font-weight: bold;
+				font-size: 12px;
+                margin-left:auto;
+                margin-right:auto;
+                width: 45%;
+                color: white;
+                text-align: center;
+			}
+
+			#jsalarmclock div{
+				margin-bottom: 0.8em;
+			}
+
+            #jsalarmclock div.leftcolumn{
+				width: 150px;
+				font-size: 13px;
+			}
+
+			#jsalarmclock span{
+				margin-right: 1%;
+			}
+            
+
+            
+			</style>
+            <script type="text/javascript">
+             <!--
+
+              var interval = window.setInterval("uhr_anzeigen()", 1000);
+
+              function uhr_anzeigen() {
+                var Datum = new Date();
+                var stunde = Datum.getHours();
+                var minute = Datum.getMinutes();
+                var sekunde = Datum.getSeconds();
+
+                Zeit = ((stunde < 10) ? " 0" : " ") + stunde;
+                Zeit += ((minute < 10) ? ":0" : ":") + minute;
+                Zeit += ((sekunde < 10) ? ":0" : ":") + sekunde;
+
+                document.getElementById('uhr').innerHTML=Zeit;
+              }
+             // -->
+            </script>
+			<script type="text/javascript">
+			var jsalarm={
+				padfield:function(f){
+					return (f<10)? "0"+f : f
+				},
+				showcurrenttime:function(){
+					var dateobj=new Date()
+					var ct=this.padfield(dateobj.getHours())+":"+this.padfield(dateobj.getMinutes())+":"+this.padfield(dateobj.getSeconds())
+					this.ctref.innerHTML=ct
+					this.ctref.setAttribute("title", ct)
+					if (typeof this.hourwake!="undefined"){ //wenn alarm aktiv
+						if (this.ctref.title==(this.hourwake+":"+this.minutewake+":"+this.secondwake)){
+							clearInterval(jsalarm.timer)
+							document.getElementsByTagName("audio")[0].play();return false
+						}
+					}
+				},
+				init:function(){
+					var dateobj=new Date()
+					this.ctref=document.getElementById("jsalarm_ct")
+					this.submitref=document.getElementById("submitbutton")
+					this.submitref.onclick=function(){
+						jsalarm.setalarm()
+						this.value="Alarm Set"
+						this.disabled=true
+						return false
+					}
+					this.resetref=document.getElementById("resetbutton")
+					this.resetref.onclick=function(){
+					jsalarm.submitref.disabled=false
+					jsalarm.hourwake=undefined
+					jsalarm.hourselect.disabled=false
+					jsalarm.minuteselect.disabled=false
+					jsalarm.secondselect.disabled=false
+                    document.getElementsByTagName("audio")[0].pause();
+                    jsalarm.showcurrenttime()
+					jsalarm.timer=setInterval(function(){jsalarm.showcurrenttime()}, 1000)
+					return false
+					}
+					var selections=document.getElementsByTagName("select")
+					this.hourselect=selections[0]
+					this.minuteselect=selections[1]
+					this.secondselect=selections[2]
+					for (var i=0; i<60; i++){
+						if (i<24) //If still within range of hours field: 0-23
+						this.hourselect[i]=new Option(this.padfield(i), this.padfield(i), false, dateobj.getHours()==i)
+						this.minuteselect[i]=new Option(this.padfield(i), this.padfield(i), false, dateobj.getMinutes()==i)
+						this.secondselect[i]=new Option(this.padfield(i), this.padfield(i), false, dateobj.getSeconds()==i)
+
+					}
+					jsalarm.showcurrenttime()
+					jsalarm.timer=setInterval(function(){jsalarm.showcurrenttime()}, 1000)
+				},
+				setalarm:function(){
+					this.hourwake=this.hourselect.options[this.hourselect.selectedIndex].value
+					this.minutewake=this.minuteselect.options[this.minuteselect.selectedIndex].value
+					this.secondwake=this.secondselect.options[this.secondselect.selectedIndex].value
+					this.hourselect.disabled=true
+					this.minuteselect.disabled=true
+					this.secondselect.disabled=true
+				}
+			}
+
+		</script>
+	</head>
+
+<body onload="uhr_anzeigen()">
+    
+    <figure id="logo">
+    <img src="img/daiber_logo.png" alt="Daiber">
+    </figure>  
+
+    <div id="uhr"><!-- Uhr --></div>
+    
+    <form action="" method="">
+		<div id="jsalarmclock">
+		<div><div class="leftcolumn">Weckzeit:</div><span><select></select> Stunde</span> <span><select></select> Minute</span><span><select>         </select> Sekunde</span></div>
+		<input type="submit" value="Alarm setzen" id="submitbutton" /> <input type="Reset" value="reset" id="resetbutton" />
+		</div>
+	</form>
+    
+    <div><div class="leftcolumnde"></div><span id="jsalarm_ct" style="letter-spacing: 2px"></span></div>
+    
+    <audio id=audio>
+        <source src="sound.mp3">
+    </audio>
+
+	<script type="text/javascript">
+
+	jsalarm.init()
+
+	</script>
+</body>
